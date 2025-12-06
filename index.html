@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sadece Senin İçin</title>
+    <style>
+        body {
+            background-color: #121212; /* Siyah/Karanlık Mod */
+            color: #e0e0e0;
+            font-family: 'Courier New', Courier, monospace; /* Daktilo Havası */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        #message-container {
+            max-width: 600px;
+            line-height: 1.6;
+            font-size: 18px;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 20px;
+            background-color: #e0e0e0;
+            animation: blink 0.7s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #btn {
+            margin-top: 30px;
+            padding: 10px 20px;
+            background: transparent;
+            border: 1px solid #e0e0e0;
+            color: #e0e0e0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        #btn:hover {
+            background: #e0e0e0;
+            color: #121212;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="message-container">
+        <span id="text"></span><span class="cursor"></span>
+    </div>
+
+    <button id="btn" class="hidden" onclick="revealNext()">Devam et...</button>
+
+    <script>
+        // BURAYA KENDİ CÜMLELERİNİ YAZABİLİRSİN
+        const lines = [
+            "Biliyorum, korkuyorsun...",
+            "Belki de haklısın. Geçmiş bazen çok ağır gelebiliyor.",
+            "Sana 'hemen bana güven' demeyeceğim.",
+            "Güven, sözlerle değil, zamanla kazanılır.",
+            "Sadece şunu bilmeni istiyorum:",
+            "Seninle olabileceklerimizin güzelliği, tüm korkulara değer.",
+            "Ben buradayım. Sabırla, sen hazır olana kadar bekliyorum.",
+            "Sadece elini uzatman yeterli..."
+        ];
+
+        let lineIndex = 0;
+        let charIndex = 0;
+        const textElement = document.getElementById("text");
+        const btn = document.getElementById("btn");
+        const speed = 50; // Yazma hızı (ms)
+
+        function typeWriter() {
+            if (lineIndex < lines.length) {
+                if (charIndex < lines[lineIndex].length) {
+                    textElement.innerHTML += lines[lineIndex].charAt(charIndex);
+                    charIndex++;
+                    setTimeout(typeWriter, speed);
+                } else {
+                    // Cümle bitti
+                    btn.classList.remove("hidden");
+                }
+            }
+        }
+
+        function revealNext() {
+            btn.classList.add("hidden");
+            textElement.innerHTML = ""; // Ekranı temizle (istersen bu satırı silip alt alta yazdırabilirsin)
+            charIndex = 0;
+            lineIndex++;
+            if (lineIndex < lines.length) {
+                typeWriter();
+            } else {
+                // Her şey bittiğinde
+                textElement.innerHTML = "Seni bekliyorum.";
+                document.querySelector(".cursor").style.display = "none";
+            }
+        }
+
+        // Sayfa yüklenince başla
+        window.onload = typeWriter;
+    </script>
+</body>
+</html>
