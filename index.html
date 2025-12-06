@@ -3,119 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sadece Senin İçin</title>
+    <title>Bize Dair</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
     <style>
         body {
-            background-color: #121212; /* Siyah/Karanlık Mod */
-            color: #e0e0e0;
-            font-family: 'Courier New', Courier, monospace; /* Daktilo Havası */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
+            background-color: #050505; /* Tam siyah değil, çok koyu lüks siyah */
+            color: #f0f0f0;
             margin: 0;
-            padding: 20px;
-            text-align: center;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Playfair Display', serif; /* Klas font */
             overflow: hidden;
+            cursor: pointer; /* Tıklanabilir hissi ver */
+            user-select: none; /* Yazı seçilmese daha şık durur */
         }
 
-        #message-container {
-            max-width: 600px;
-            line-height: 1.6;
-            font-size: 18px;
+        #content {
+            text-align: center;
+            max-width: 800px;
+            padding: 0 20px;
+            transition: opacity 1.5s ease-in-out, transform 1.5s ease-out;
+            opacity: 0; /* Başlangıçta görünmez */
+            transform: translateY(20px); /* Hafif aşağıdan yukarı çıkış efekti */
         }
 
-        .cursor {
-            display: inline-block;
-            width: 10px;
-            height: 20px;
-            background-color: #e0e0e0;
-            animation: blink 0.7s infinite;
+        .visible {
+            opacity: 1 !important;
+            transform: translateY(0) !important;
         }
 
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 400;
+            line-height: 1.4;
+            letter-spacing: 1px;
         }
 
-        .hidden {
-            display: none;
+        /* Mobilde fontu biraz küçültelim */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
         }
 
-        #btn {
-            margin-top: 30px;
-            padding: 10px 20px;
-            background: transparent;
-            border: 1px solid #e0e0e0;
-            color: #e0e0e0;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: inherit;
-        }
-
-        #btn:hover {
-            background: #e0e0e0;
-            color: #121212;
+        .hint {
+            position: absolute;
+            bottom: 30px;
+            font-size: 0.8rem;
+            opacity: 0.3;
+            font-family: sans-serif;
+            letter-spacing: 2px;
+            text-transform: uppercase;
         }
     </style>
 </head>
 <body>
 
-    <div id="message-container">
-        <span id="text"></span><span class="cursor"></span>
+    <div id="content">
+        <h1 id="text-display"></h1>
     </div>
 
-    <button id="btn" class="hidden" onclick="revealNext()">Devam et...</button>
+    <div class="hint">İlerlemek için ekrana dokun</div>
 
     <script>
-        // BURAYA KENDİ CÜMLELERİNİ YAZABİLİRSİN
-        const lines = [
-            "Biliyorum, korkuyorsun...",
-            "Belki de haklısın. Geçmiş bazen çok ağır gelebiliyor.",
-            "Sana 'hemen bana güven' demeyeceğim.",
-            "Güven, sözlerle değil, zamanla kazanılır.",
-            "Sadece şunu bilmeni istiyorum:",
-            "Seninle olabileceklerimizin güzelliği, tüm korkulara değer.",
-            "Ben buradayım. Sabırla, sen hazır olana kadar bekliyorum.",
-            "Sadece elini uzatman yeterli..."
+        // ŞOV VE KLASLIK İÇEREN METİNLER
+        const messages = [
+            "Herkes senin ördüğün duvarlara çarpıp geri döndü.",
+            "Haklılar... O duvarlar çok yüksek.",
+            "Geçmişin taşlarıyla örülmüş, soğuk ve sert.",
+            "Ama gidenler bir şeyi kaçırdı...",
+            "Ben o duvarlara bakınca 'engel' görmüyorum.",
+            "Ben, o duvarların arkasında sakladığın <i>muazzam manzarayı</i> görüyorum.",
+            "Korkman teferruat.",
+            "Çünkü ben, o duvarları yıkmaya değil...",
+            "Kapısında, sen hazır olana kadar beklemeye geldim.",
+            "Ve inan bana...",
+            "Hikayemiz başladığında, beklediğimiz her saniyeye değecek."
         ];
 
-        let lineIndex = 0;
-        let charIndex = 0;
-        const textElement = document.getElementById("text");
-        const btn = document.getElementById("btn");
-        const speed = 50; // Yazma hızı (ms)
+        let currentIndex = -1;
+        const contentDiv = document.getElementById("content");
+        const textDisplay = document.getElementById("text-display");
+        let isAnimating = false;
 
-        function typeWriter() {
-            if (lineIndex < lines.length) {
-                if (charIndex < lines[lineIndex].length) {
-                    textElement.innerHTML += lines[lineIndex].charAt(charIndex);
-                    charIndex++;
-                    setTimeout(typeWriter, speed);
+        function showNextMessage() {
+            if (isAnimating) return; // Animasyon bitmeden tıklamayı engelle
+            isAnimating = true;
+
+            // Önce yazıyı kaybet (Fade out)
+            contentDiv.classList.remove("visible");
+
+            setTimeout(() => {
+                currentIndex++;
+
+                if (currentIndex < messages.length) {
+                    // Yeni yazıyı koy
+                    textDisplay.innerHTML = messages[currentIndex];
+                    // Yazıyı getir (Fade in)
+                    contentDiv.classList.add("visible");
+                    isAnimating = false;
                 } else {
-                    // Cümle bitti
-                    btn.classList.remove("hidden");
+                    // SON EKRAN - Burada kalabilir veya başka bir şey yapabiliriz
+                    textDisplay.innerHTML = "Sadece biz.";
+                    contentDiv.classList.add("visible");
                 }
-            }
+            }, 1500); // 1.5 saniye bekle (yazının kaybolması için)
         }
 
-        function revealNext() {
-            btn.classList.add("hidden");
-            textElement.innerHTML = ""; // Ekranı temizle (istersen bu satırı silip alt alta yazdırabilirsin)
-            charIndex = 0;
-            lineIndex++;
-            if (lineIndex < lines.length) {
-                typeWriter();
-            } else {
-                // Her şey bittiğinde
-                textElement.innerHTML = "Seni bekliyorum.";
-                document.querySelector(".cursor").style.display = "none";
-            }
-        }
+        // İlk açılışta otomatik başlasın
+        window.onload = () => {
+            setTimeout(showNextMessage, 500);
+        };
 
-        // Sayfa yüklenince başla
-        window.onload = typeWriter;
+        // Ekrana tıklayınca/dokununca diğerine geç
+        document.body.addEventListener("click", showNextMessage);
+
+        // Boşluk tuşu ile de geçiş
+        document.body.addEventListener("keydown", (e) => {
+            if(e.code === "Space") showNextMessage();
+        });
+
     </script>
 </body>
 </html>
